@@ -1,0 +1,18 @@
+{
+	"name": "iutbay/yii2-imagecache",
+	"description": "ImageCache for Yii2",
+	"keywords": ["yii2", "image", "resize", "thumb", "cache"],
+	"homepage": "https://github.com/iutbay/yii2-imagecache",
+	"type": "yii2-extension",
+	"authors": [
+		{
+			"name": "Kevin LEVRON",
+			"email": "kevin.levron@gmail.com"
+		}
+	],
+	"require": {
+	},
+	"autoload": {
+		"psr-4": {"iutbay\\yii2imagecache\\": ""}
+	}
+}

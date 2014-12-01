@@ -11,6 +11,7 @@
 		}
 	],
 	"require": {
+		"yiisoft/yii2-imagine": "*"
 	},
 	"autoload": {
 		"psr-4": {"iutbay\\yii2imagecache\\": ""}

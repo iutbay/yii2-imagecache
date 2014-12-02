@@ -23,3 +23,65 @@ or add
 ```
 
 to the require section of your application's `composer.json` file.
+
+Configuration
+-------------
+You should :
+* Add `ThumbAction` in one of your controller.
+* Modify your application configuration :
+  * add _imageCache_ component,
+  * add url rule to handle request to missing thumbs.
+
+### Add _ThumbAction_
+You need to add `ThumbAction` in one of your controller so that imageCache can handle requests to missing thumbs and create them on demand. You could use `site` controller :
+```php
+class SiteController extends Controller
+{
+  ...
+  public function actions()
+  {
+      return [
+        ...
+        'thumb' => 'iutbay\yii2imagecache\ThumbAction',
+        ...
+      ];
+  }
+  ...
+}
+```
+
+### _imageCache_ component config
+You should add _imageCache_ component in your application configuration :
+```php
+$config = [
+    'components' => [
+      ...
+      'imageCache' => [
+        'class' => 'iutbay\yii2imagecache\ImageCache',
+        'sourcePath' => '@app/web/images',
+        //'thumbsPath' => '@app/web/thumbs',
+        //'thumbsUrl' => '@web/thumbs',
+      ],
+      ...
+    ]
+];
+```
+
+### _urlManager_ config
+```php
+$config = [
+    'components' => [
+      ...
+      'urlManager' => [
+        'enablePrettyUrl' => true,
+        'showScriptName' => false,
+        'rules' => [
+          ...
+          'thumbs/<path:.*>' => 'site/thumb',
+          ...
+        ],
+      ],
+      ...
+    ]
+];
+```

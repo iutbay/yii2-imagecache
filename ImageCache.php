@@ -4,6 +4,7 @@ namespace iutbay\yii2imagecache;
 
 use Yii;
 use yii\web\HttpException;
+use yii\imagine\Image;
 
 use Imagine\Image\Box;
 use Imagine\Image\Color;
@@ -23,15 +24,18 @@ class ImageCache extends \yii\base\Component
         self::SIZE_MEDIUM => [300, 300],
         self::SIZE_LARGE => [600, 600],
     ];
+
     public $sourcePath;
     public $thumbsPath;
     public $thumbsUrl;
+
     public $defaultSizeSuffix = '_';
     public $sizeSuffixes = [
         self::SIZE_THUMB => '',
         self::SIZE_MEDIUM => '',
         self::SIZE_LARGE => '',
     ];
+
     public $extensions = [
         'jpg' => 'jpeg',
         'jpeg' => 'jpeg',
@@ -59,96 +63,73 @@ class ImageCache extends \yii\base\Component
     }
 
     /**
-     * Create image
+     * Create thumb
      * @param string $path image path
      * @param boolean $overwrite
      * @return boolean
      */
     public function create($path, $overwrite = true)
     {
-        // http://localhost/yii2-basic/web/thumbs/strain/white-widow/corey_thumb.jpg
-
         // test path
         $info = $this->getPathInfo($path);
         if (!is_array($info))
             return false;
 
         // check original image
-        $srcPath = $this->sourcePath . '/' . $info['path'];
-        if (!file_exists($srcPath))
+        if (!file_exists($info['srcPath']))
             return false;
 
         // check destination folder
-        $folder = preg_replace('#/[^/]*$#', '', $info['path']);
-        $folder = $this->thumbsPath . '/' . $folder;
+        $folder = preg_replace('#/[^/]*$#', '', $info['dstPath']);
         if (!file_exists($folder))
             @mkdir($folder, 0777, true);
 
-        // create image
-        $dstPath = $this->thumbsPath . '/' . $path;
-        return $this->createThumb($srcPath, $dstPath, $info['size']);
-    }
-
-    public function createThumb($srcPath, $dstPath, $size, $mode = ManipulatorInterface::THUMBNAIL_OUTBOUND)
-    {
-        var_dump(func_get_args());
-
-        $width = $size[0];
-        $height = $size[1];
-//        $box = new Box($width, $height);
-//        $img = static::getImagine()->load($data);
-//
-//        if (($img->getSize()->getWidth() <= $box->getWidth() && $img->getSize()->getHeight() <= $box->getHeight()) || (!$box->getWidth() && !$box->getHeight())) {
-//            return $img->copy();
-//        }
-//
-//        $img = $img->thumbnail($box, $mode);
-//
-//        // create empty image to preserve aspect ratio of thumbnail
-//        $thumb = static::getImagine()->create($box, new Color('FFF', 100));
-//
-//        // calculate points
-//        $size = $img->getSize();
-//
-//        $startX = 0;
-//        $startY = 0;
-//        if ($size->getWidth() < $width) {
-//            $startX = ceil($width - $size->getWidth()) / 2;
-//        }
-//        if ($size->getHeight() < $height) {
-//            $startY = ceil($height - $size->getHeight()) / 2;
-//        }
-//
-//        $thumb->paste($img, new Point($startX, $startY));
-//
-//        return $thumb;
-
-        return true;
+        // create thumb
+        return $this->createThumb($info['srcPath'], $info['dstPath'], $info['size']);
     }
 
     /**
-     * Output image to browser
+     * Output thumb to browser
      * @param string $path
-     * @throws HttpException
      */
     public function output($path)
     {
         // test path
         $info = $this->getPathInfo($path);
-        $path = $this->thumbsPath . '/' . $path;
-        if (!is_array($info) || !file_exists($path))
-            throw new HttpException(404, Yii::t('yii', 'Page not found.'));
+        if (!is_array($info) || (!file_exists($info['dstPath']) && !$this->create($path)))
+            return false;
 
         // send image to browser
         header('Content-type: image/' . $this->extensions[$info['extension']]);
-        header('Content-Length: ' . filesize($path));
-        readfile($path);
+        header('Content-Length: ' . filesize($info['dstPath']));
+        readfile($info['dstPath']);
+        exit();
     }
 
     /**
-     * Get size and original image path/extension from path
+     * Create thumb
+     * @param string $srcPath
+     * @param string $dstPath
+     * @param string $size
+     * @param string $mode
+     * @return boolean
+     */
+    public function createThumb($srcPath, $dstPath, $size, $mode = ManipulatorInterface::THUMBNAIL_OUTBOUND)
+    {
+        $width = $this->sizes[$size][0];
+        $height = $this->sizes[$size][1];
+        $thumb = Image::thumbnail($srcPath, $width, $height);
+
+        if ($thumb && $thumb->save($dstPath))
+            return true;
+
+        return false;
+    }
+
+    /**
+     * Get info from path
      * @param string $path
-     * @return string size
+     * @return null|array
      */
     private function getPathInfo($path)
     {
@@ -156,14 +137,15 @@ class ImageCache extends \yii\base\Component
         if (preg_match($regexp, $path, $matches)) {
             return [
                 'size' => $this->getSizeFromSuffix($matches[2]),
-                'path' => $matches[1] . '.' . $matches[3],
+                'srcPath' => $this->sourcePath . '/' . $matches[1] . '.' . $matches[3],
+                'dstPath' => $this->thumbsPath . '/' . $path,
                 'extension' => $matches[3],
             ];
         }
     }
 
     /**
-     * Get path suffixes regexp
+     * Get size suffixes regexp
      * @return string regexp
      */
     private function getSizeSuffixesRegexp()

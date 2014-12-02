@@ -68,6 +68,7 @@ $config = [
 ```
 
 ### _urlManager_ config
+You should modify your _urlManager_ configuration :
 ```php
 $config = [
     'components' => [

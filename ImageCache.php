@@ -106,6 +106,7 @@ class ImageCache extends \yii\base\Component
         $suffix = $this->getSufixFromSize($size);
         $src = "{$matches[1]}{$suffix}.{$matches[2]}";
         $src = str_replace($this->sourceUrl, $this->thumbsUrl, $src);
+        $src = str_replace('%', '%25', $src);
         return $src;
     }
 

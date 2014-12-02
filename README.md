@@ -59,8 +59,14 @@ $config = [
       'imageCache' => [
         'class' => 'iutbay\yii2imagecache\ImageCache',
         'sourcePath' => '@app/web/images',
+        'sourceUrl' => '@web/images',
         //'thumbsPath' => '@app/web/thumbs',
         //'thumbsUrl' => '@web/thumbs',
+        //'sizes' => [
+        //    'thumb' => [150, 150],
+        //    'medium' => [300, 300],
+        //    'large' => [600, 600],
+        //],
       ],
       ...
     ],
@@ -85,4 +91,17 @@ $config = [
       ...
     ],
 ];
+```
+
+How to use
+----------
+```php
+<?= Yii::$app->imageCache->thumb('/your-app/images/2014/test.jpg') ?>
+// <img src="/your-app/thumbs/2014/test_thumb.jpg" alt="">
+
+<?= Yii::$app->imageCache->thumb('/your-app/images/2014/test.jpg', 'medium') ?>
+// <img src="/your-app/thumbs/2014/test_medium.jpg" alt="">
+
+<?= Yii::$app->imageCache->thumb('/your-app/images/2014/test.jpg', 'medium', ['class'=>'img']) ?>
+// <img src="/your-app/thumbs/2014/test_medium.jpg" alt="" class="img">
 ```

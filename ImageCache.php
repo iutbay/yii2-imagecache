@@ -3,14 +3,15 @@
 namespace iutbay\yii2imagecache;
 
 use Yii;
-use yii\web\HttpException;
 use yii\imagine\Image;
+use yii\helpers\Html;
 
-use Imagine\Image\Box;
-use Imagine\Image\Color;
-use Imagine\Image\Point;
 use Imagine\Image\ManipulatorInterface;
 
+/**
+ * ImageCache Component
+ * @author Kevin LEVRON <kevin.levron@gmail.com>
+ */
 class ImageCache extends \yii\base\Component
 {
 
@@ -26,6 +27,7 @@ class ImageCache extends \yii\base\Component
     ];
 
     public $sourcePath;
+    public $sourceUrl;
     public $thumbsPath;
     public $thumbsUrl;
 
@@ -51,20 +53,55 @@ class ImageCache extends \yii\base\Component
     {
         parent::init();
 
-        if (!isset($this->sourcePath))
-            throw new \yii\base\InvalidConfigException('Invalid sourcePath.');
+        if (!isset($this->sourcePath) || !isset($this->sourceUrl))
+            throw new \yii\base\InvalidConfigException('Invalid sourcePath/sourceUrl.');
+
+        if (!isset($this->thumbsPath) || !isset($this->thumbsUrl)) {
+            $this->thumbsPath = '@app/web/thumbs';
+            $this->thumbsUrl = '@web/thumbs';
+        }
 
         $this->sourcePath = Yii::getAlias($this->sourcePath);
+        $this->sourceUrl = Yii::getAlias($this->sourceUrl);
+        $this->thumbsPath = Yii::getAlias($this->thumbsPath);
+        $this->thumbsUrl = Yii::getAlias($this->thumbsUrl);
+    }
+    
+    /**
+     * Get thumb img tag
+     * @param string $path
+     * @param string $size
+     * @return string html img
+     */
+    public function thumb($path, $size = self::SIZE_THUMB, $imgOptions = [])
+    {
+        return Html::img(self::thumbSrc($path, $size), $imgOptions);
+    }
 
-        if (!isset($this->thumbsPath)) {
-            $this->thumbsPath = Yii::getAlias('@app/web/thumbs');
-            $this->thumbsUrl = Yii::getAlias('@web/thumbs');
-        }
+    /**
+     * Get thumb src
+     * @param string $path
+     * @param string $size
+     * @return string html img
+     */
+    public function thumbSrc($path, $size = self::SIZE_THUMB)
+    {
+        if (!isset($this->sizes[$size]))
+            throw new \InvalidArgumentException('Unkown size '.$size);
+
+        $realPath = str_replace($this->sourceUrl, $this->sourcePath, $path);
+        if (!file_exists($realPath) || !preg_match('#^(.*)\.('.$this->getExtensionsRegexp().')$#', $path, $matches))
+            throw new \InvalidArgumentException('Invalid path '.$realPath);
+
+        $suffix = $this->getSufixFromSize($size);
+        $src = "{$matches[1]}{$suffix}.{$matches[2]}";
+        $src = str_replace($this->sourceUrl, $this->thumbsUrl, $src);
+        return $src;
     }
 
     /**
      * Create thumb
-     * @param string $path image path
+     * @param string $path thumb path
      * @param boolean $overwrite
      * @return boolean
      */
@@ -90,7 +127,7 @@ class ImageCache extends \yii\base\Component
 
     /**
      * Output thumb to browser
-     * @param string $path
+     * @param string $path thumb path
      */
     public function output($path)
     {
@@ -118,7 +155,7 @@ class ImageCache extends \yii\base\Component
     {
         $width = $this->sizes[$size][0];
         $height = $this->sizes[$size][1];
-        $thumb = Image::thumbnail($srcPath, $width, $height);
+        $thumb = Image::thumbnail($srcPath, $width, $height, $mode);
 
         if ($thumb && $thumb->save($dstPath))
             return true;
@@ -174,7 +211,7 @@ class ImageCache extends \yii\base\Component
     }
 
     /**
-     * Get size from path suffix
+     * Get size from suffix
      * @param string $suffix
      * @return string size
      */
@@ -186,6 +223,19 @@ class ImageCache extends \yii\base\Component
             if ($val === $suffix)
                 return $key;
         }
+    }
+
+    /**
+     * Get suffix from size
+     * @param string $size
+     * @return string suffix
+     */
+    private function getSufixFromSize($size)
+    {
+        if (!empty($this->sizeSuffixes[$size]))
+            return $this->sizeSuffixes[$size];
+
+        else return $this->defaultSizeSuffix . $size;
     }
 
 }

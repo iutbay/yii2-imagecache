@@ -6,6 +6,12 @@ If a thumb doesn't exist, the web server's rewrite rules will pass the request t
 
 WIP...
 
+Features
+--------
+- [x] image resize on demand
+- [x] text watermark
+- [ ] image watermark
+
 Installation
 ------------
 The preferred way to install this helper is through [composer](http://getcomposer.org/download/).

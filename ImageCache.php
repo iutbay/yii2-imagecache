@@ -100,7 +100,7 @@ class ImageCache extends \yii\base\Component
             throw new \yii\base\InvalidParamException('Unkown size ' . $size);
 
         $realPath = str_replace($this->sourceUrl, $this->sourcePath, $path);
-        if (!file_exists($realPath) || !preg_match('#^(.*)\.(' . $this->getExtensionsRegexp() . ')$#', $path, $matches))
+        if (!file_exists($realPath) || !preg_match('#^(.*)\.(' . $this->getExtensionsRegexp() . ')$#i', $path, $matches))
             throw new \yii\base\InvalidParamException('Invalid path ' . $path);
 
         $suffix = $this->getSufixFromSize($size);

@@ -80,6 +80,11 @@ $config = [
 ```
 
 ### _urlManager_ config
+
+> You should enable pretty urls :
+
+> http://www.yiiframework.com/doc-2.0/guide-start-installation.html#configuring-web-servers
+
 You should modify your _urlManager_ configuration :
 ```php
 $config = [
@@ -102,12 +107,12 @@ $config = [
 How to use
 ----------
 ```php
-<?= Yii::$app->imageCache->thumb('/your-app/images/2014/test.jpg') ?>
+<?= Yii::$app->imageCache->thumb('@web/images/2014/test.jpg') ?>
 // <img src="/your-app/thumbs/2014/test_thumb.jpg" alt="">
 
-<?= Yii::$app->imageCache->thumb('/your-app/images/2014/test.jpg', 'medium') ?>
+<?= Yii::$app->imageCache->thumb('@web/images/2014/test.jpg', 'medium') ?>
 // <img src="/your-app/thumbs/2014/test_medium.jpg" alt="">
 
-<?= Yii::$app->imageCache->thumb('/your-app/images/2014/test.jpg', 'medium', ['class'=>'img']) ?>
+<?= Yii::$app->imageCache->thumb('@web/images/2014/test.jpg', 'medium', ['class'=>'img']) ?>
 // <img src="/your-app/thumbs/2014/test_medium.jpg" alt="" class="img">
 ```

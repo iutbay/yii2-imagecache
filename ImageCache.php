@@ -73,6 +73,9 @@ class ImageCache extends \yii\base\Component
         $this->thumbsPath = Yii::getAlias($this->thumbsPath);
         $this->thumbsUrl = Yii::getAlias($this->thumbsUrl);
 
+        $this->sourcePath = str_replace('\\', '/', $this->sourcePath);
+        $this->thumbsPath = str_replace('\\', '/', $this->thumbsPath);
+
         if (!isset($this->resizeMode))
             $this->resizeMode = ManipulatorInterface::THUMBNAIL_OUTBOUND;
     }
@@ -96,6 +99,8 @@ class ImageCache extends \yii\base\Component
      */
     public function thumbSrc($path, $size = self::SIZE_THUMB)
     {
+        $path = Yii::getAlias($path);
+
         if ($size != self::SIZE_FULL && !isset($this->sizes[$size]))
             throw new \yii\base\InvalidParamException('Unkown size ' . $size);
 

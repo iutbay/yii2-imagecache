@@ -190,7 +190,9 @@ class ImageCache extends \yii\base\Component
             $thumb->draw()->text($this->text['text'], $font, new Point($start[0], $start[1]), $fontAngle);
         }
 
-        if ($thumb && $thumb->save($dstPath))
+        $options = !empty($this->sizes[$size]['options']) ? $this->sizes[$size]['options'] : [];
+
+        if ($thumb && $thumb->save($dstPath, $options))
             return true;
 
         return false;

@@ -184,7 +184,8 @@ class ImageCache extends \yii\base\Component
             $fontAngle = ArrayHelper::getValue($fontOptions, 'angle', 0);
             $start = ArrayHelper::getValue($this->text, 'start', [0, 0]);
 
-            $font = Image::getImagine()->font(Yii::getAlias($this->text['fontFile']), $fontSize, new Color($fontColor));
+            $palette = new \Imagine\Image\Palette\RGB();
+            $font = Image::getImagine()->font(Yii::getAlias($this->text['fontFile']), $fontSize, $palette->color($fontColor));
             $thumb->draw()->text($this->text['text'], $font, new Point($start[0], $start[1]), $fontAngle);
         }
 

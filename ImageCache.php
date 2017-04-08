@@ -167,13 +167,15 @@ class ImageCache extends \yii\base\Component
      * @param string $mode
      * @return boolean
      */
-    public function createThumb($srcPath, $dstPath, $size, $mode = ManipulatorInterface::THUMBNAIL_OUTBOUND)
+    public function createThumb($srcPath, $dstPath, $size, $mode = ManipulatorInterface::THUMBNAIL_INSET)
     {
         if ($size == self::SIZE_FULL) {
             $thumb = Image::getImagine()->open($srcPath);
         } else {
             $width = $this->sizes[$size][0];
             $height = $this->sizes[$size][1];
+            $mode = !empty($this->sizes[$size]['mode']) ? $this->sizes[$size]['mode'] : $mode;
+
             $thumb = Image::thumbnail($srcPath, $width, $height, $mode);
         }
 
@@ -189,7 +191,9 @@ class ImageCache extends \yii\base\Component
             $thumb->draw()->text($this->text['text'], $font, new Point($start[0], $start[1]), $fontAngle);
         }
 
-        if ($thumb && $thumb->save($dstPath))
+        $options = !empty($this->sizes[$size]['options']) ? $this->sizes[$size]['options'] : [];
+
+        if ($thumb && $thumb->save($dstPath, $options))
             return true;
 
         return false;

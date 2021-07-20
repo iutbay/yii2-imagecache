@@ -97,7 +97,7 @@ class ImageCache extends \yii\base\Component
      * @param string $size
      * @return string
      */
-    public function thumbSrc($path, $size = self::SIZE_THUMB)
+    public function thumbSrc($path, $size = self::SIZE_THUMB, $suffix_thumb = false)
     {
         $path = Yii::getAlias($path);
 
@@ -108,7 +108,9 @@ class ImageCache extends \yii\base\Component
         if (!file_exists($realPath) || !preg_match('#^(.*)\.(' . $this->getExtensionsRegexp() . ')$#', $path, $matches))
             throw new \yii\base\InvalidParamException('Invalid path ' . $path);
 
-        $suffix = $this->getSufixFromSize($size);
+        $suffix = "";
+        if($suffix_thumb)
+            $suffix = $this->getSufixFromSize($size);
         $src = "{$matches[1]}{$suffix}.{$matches[2]}";
         $src = str_replace($this->sourceUrl, $this->thumbsUrl, $src);
         $src = str_replace('%', '%25', $src);
@@ -167,7 +169,7 @@ class ImageCache extends \yii\base\Component
      * @param string $mode
      * @return boolean
      */
-    public function createThumb($srcPath, $dstPath, $size, $mode = ManipulatorInterface::THUMBNAIL_OUTBOUND)
+    public function createThumb($srcPath, $dstPath, $size, $mode = ManipulatorInterface::THUMBNAIL_OUTBOUND, $quality = 70)
     {
         if ($size == self::SIZE_FULL) {
             $thumb = Image::getImagine()->open($srcPath);
@@ -189,7 +191,7 @@ class ImageCache extends \yii\base\Component
             $thumb->draw()->text($this->text['text'], $font, new Point($start[0], $start[1]), $fontAngle);
         }
 
-        if ($thumb && $thumb->save($dstPath))
+        if ($thumb && $thumb->save($dstPath, ['quality' => $quality]))
             return true;
 
         return false;
